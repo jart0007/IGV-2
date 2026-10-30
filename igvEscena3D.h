@@ -1,5 +1,6 @@
 #ifndef __IGVESCENA3D
 #define __IGVESCENA3D
+#include "igvExotraje.h"
 
 #if defined(__APPLE__) && defined(__MACH__)
 #include <GLUT/glut.h>
@@ -25,6 +26,9 @@ private:
     // TODO: Apartado A: A�adir aqu� los atributos con los �ngulos de rotaci�n en X, Y y Z.
     double rotX=0, rotY=0, rotZ=0;
     igvMallaTriangulos* malla = nullptr; ///< Malla de tri�ngulos asociada a la escena
+
+    //añadir el atributo para el modelo articulado
+    igvExotraje* modelo = nullptr;
 public:
         // Constructores por defecto y destructor
     igvEscena3D();

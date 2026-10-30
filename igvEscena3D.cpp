@@ -30,6 +30,11 @@ igvEscena3D::~igvEscena3D()
         delete malla;
         malla = nullptr;
     }
+    if (modelo != nullptr)
+    {
+        delete modelo;
+        modelo = nullptr;
+    }
 }
 
 
