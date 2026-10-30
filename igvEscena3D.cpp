@@ -97,7 +97,6 @@ void igvEscena3D::visualizar(void)
     cyl=nullptr;*/
     malla->visualizar();
 
-
     glPopMatrix(); // restaura la matriz de modelado
 }
 

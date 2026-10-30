@@ -3,6 +3,8 @@
 #include <math.h>
 #include "igvMallaTriangulos.h"
 
+
+
 /**
  * Constructor parametrizado de una malla de tri�ngulos sin normales en los
  * v�rtices
@@ -92,4 +94,16 @@ void igvMallaTriangulos::visualizar()
     glDrawElements(GL_TRIANGLES, num_triangulos * 3, GL_UNSIGNED_INT, triangulos);
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
+}
+
+//setter y getter de booleano gouraud
+
+bool igvMallaTriangulos::isGouraud() const
+{
+    return gouraud;
+}
+
+void igvMallaTriangulos::setGouraud(bool gouraud)
+{
+    this->gouraud = gouraud;
 }

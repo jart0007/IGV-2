@@ -6,6 +6,9 @@
 // Aplicaci�n del patr�n de dise�o Singleton
 igvInterfaz* igvInterfaz::_instancia = nullptr;
 
+// Constructor por defecto
+igvInterfaz::igvInterfaz() = default;
+
 // M�todos p�blicos ----------------------------------------
 
 /**
@@ -63,6 +66,9 @@ void igvInterfaz::configura_entorno(int argc, char** argv, int _ancho_ventana
     glutInitWindowSize(_ancho_ventana, _alto_ventana);
     glutInitWindowPosition(_pos_X, _pos_Y);
     glutCreateWindow(_titulo.c_str());
+
+    //<>Inicializamos el menú
+    inicializarMenu();
 
     glEnable(GL_DEPTH_TEST); // activa el ocultamiento de superficies por z-buffer
     glClearColor(1.0, 1.0, 1.0, 0.0); // establece el color de fondo de la ventana
@@ -174,6 +180,41 @@ void igvInterfaz::displayFunc()
     glutSwapBuffers(); // se utiliza, en vez de glFlush(), para evitar el parpadeo
 }
 
+
+
+
+/**
+ * M�todo para gestionar la selecci�n de opciones de men�
+ * @param value Nueva opci�n seleccionada
+ * @pre Se asume que el valor del par�metro es correcto
+ * @post Se almacena en el objeto la opci�n seleccionada
+ */
+void igvInterfaz::menuHandle ( int valor )
+{
+    _instancia->menuSelection = valor;
+
+    switch (valor)
+    {
+        case M_PLANO:
+                _instancia->escena.getMalla()->setGouraud(false);
+                break;
+
+        case M_GOURAUD:
+            _instancia->escena.getMalla()->setGouraud(true);
+            break;
+    }
+    glutPostRedisplay();
+}
+
+void igvInterfaz::inicializarMenu()
+{
+    int menu = glutCreateMenu(menuHandle);
+
+    glutAddMenuEntry("Gl_FLAT",M_PLANO);
+    glutAddMenuEntry("GL_SMOOTH",M_GOURAUD);
+
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
 /**
  * M�todo para inicializar los callbacks GLUT
  */

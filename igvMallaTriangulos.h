@@ -26,10 +26,15 @@ protected:
 
     long int num_triangulos = 0; ///< N�mero de tri�ngulos de la malla de tri�ngulos
     unsigned int* triangulos = nullptr; ///< Array con los (num_triangulos * 3) �ndices a los v�rtices de cada tri�ngulo
-    bool usarnormales=0;
+
+    //Ponemos a uno para que use las normales para ver los cambios del menu
+    bool usarnormales=1;
     bool gouraud=0;
 
 public:
+    bool isGouraud() const;
+    void setGouraud(bool gouraud);
+
     // Constructor y destructor
     /// Constructor por defecto
     igvMallaTriangulos() = default;

@@ -10,7 +10,10 @@
 /**
  * Constructor por defecto
  */
-igvLampara::igvLampara() : igvMallaTriangulos(){}
+igvLampara::igvLampara() : igvMallaTriangulos()
+{
+    usarnormales = false;
+}
 
 
 /**
