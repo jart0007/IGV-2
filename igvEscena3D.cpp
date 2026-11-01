@@ -18,6 +18,7 @@ igvEscena3D::igvEscena3D()
 {
     // TODO: rtApaado B: Inseel crta �digo para crear un cilindro
     malla = new igvLampara(0.3,1,40,30);
+    modelo = new igvExotraje();
 }
 
 /**
@@ -83,7 +84,7 @@ void igvEscena3D::visualizar(void)
     // se pintan los ejes
     if (ejes) pintar_ejes();
 
-    // crear el modelo
+    // crear la malla
     glPushMatrix(); // guarda la matriz de modelado
 
     glRotatef(rotX, 1, 0, 0);
@@ -100,9 +101,17 @@ void igvEscena3D::visualizar(void)
     gluCylinder(cyl, 1, 1, 1, 20, 5);
     gluDeleteQuadric(cyl);
     cyl=nullptr;*/
+    glTranslatef(-1,0,-1);
     malla->visualizar();
 
+
     glPopMatrix(); // restaura la matriz de modelado
+
+    glPushMatrix();
+    //crear el modelo articulado
+    modelo->visualizar();
+
+    glPopMatrix();
 }
 
 /**

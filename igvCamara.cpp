@@ -127,3 +127,20 @@ void igvCamara::aplicar ( void )
  */
 void igvCamara::zoom ( double factor )
 { }
+
+
+void igvCamara::orbita(double num)
+{
+   double dx = P0[X] - r[X];
+   double dz = P0[Z] - r[Z];
+
+   double ang_ant = atan2(dx,dz);
+
+   double rad = num * (M_PI / 180);
+   double nuevo_ang = ang_ant + rad;
+
+   double radio = sqrt(dx*dx + dz*dz);
+
+   P0[X] = r[X] + radio*sin(nuevo_ang);
+   P0[Z] = r[Z] + radio*cos(nuevo_ang);
+}

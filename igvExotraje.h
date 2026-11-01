@@ -15,6 +15,10 @@
 
 class igvExotraje{
 public:
+    igvExotraje() = default;
+    ~igvExotraje() = default;
+
+    void pintar_tubo(float largo, float ancho);
     void pintarCuerpo();
     void pintarBrazo1();
     void pintarBrazo2();
@@ -22,6 +26,8 @@ public:
     void pintarLanzador();
     void pintarRueda();///< x2
     void pintarBrazoLanzaMisiles();
+
+
 
     //metodo para visualizar todo el modelo
     void visualizar();

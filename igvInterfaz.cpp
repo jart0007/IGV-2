@@ -131,6 +131,12 @@ void igvInterfaz::keyboardFunc(unsigned char key, int x, int y)
     case 'G':
         _instancia->escena.getMalla()->cambiarvis();
         break;
+    case 'r':
+        _instancia->camara.orbita(5);
+        break;
+    case 'R':
+        _instancia->camara.orbita(-5);
+        break;
 
     case 'e': // activa/desactiva la visualizacion de los ejes
          _instancia->escena.set_ejes(_instancia->escena.get_ejes() ? false : true);

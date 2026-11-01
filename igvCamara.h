@@ -86,6 +86,7 @@ class igvCamara
                              // de visión y la transformación de proyección
                              // asociadas a los parámetros de la cámara
       void zoom ( double factor ); // realiza un zoom sobre la cámara
+      void orbita(double num);
 };
 
 #endif   // __IGVCAMARA
