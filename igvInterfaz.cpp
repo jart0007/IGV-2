@@ -144,8 +144,33 @@ void igvInterfaz::keyboardFunc(unsigned char key, int x, int y)
     case 27: // tecla de escape para SALIR
         exit(1);
         break;
+
+    case '1': case '2': case '3': case '4': //ir añadiendo casos para cada glado de libertad
+        _instancia->parte = key -'0';
+        break;
     }
     glutPostRedisplay(); // renueva el contenido de la ventana de visi�n
+}
+
+void igvInterfaz::specialFunc(int key, int x, int y)
+{
+    switch (key)
+    {
+    case GLUT_KEY_LEFT:
+        _instancia->escena.mover(_instancia->parte, -1);
+        break;
+    case GLUT_KEY_RIGHT:
+        _instancia->escena.mover(_instancia->parte, +1);
+        break;
+    case GLUT_KEY_UP:
+        _instancia->escena.mover(_instancia->parte, +1);
+        break;
+    case GLUT_KEY_DOWN:
+        _instancia->escena.mover(_instancia->parte, -1);
+        break;
+    }
+
+    glutPostRedisplay();
 }
 
 /**
@@ -229,6 +254,7 @@ void igvInterfaz::inicializa_callbacks()
     glutKeyboardFunc(keyboardFunc);
     glutReshapeFunc(reshapeFunc);
     glutDisplayFunc(displayFunc);
+    glutSpecialFunc(specialFunc);
 }
 
 /**

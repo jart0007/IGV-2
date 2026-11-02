@@ -47,6 +47,8 @@ public:
         return malla;
     }
 
+    void mover(int parte,int num);
+
     // Apartado A: métodos para incrementar los ángulos
     void incrX() {
         rotX += 10;

@@ -14,18 +14,26 @@
 #endif //PR2A_MECAHELLDVERS_H
 
 class igvExotraje{
+private:
+    float rotBrazo1;
 public:
-    igvExotraje() = default;
+    igvExotraje();
     ~igvExotraje() = default;
 
+    //funciones para pintar el exotraje
     void pintar_tubo(float largo, float ancho);
     void pintarCuerpo();
     void pintarBrazo1();
     void pintarBrazo2();
     void pintarTorreta();
     void pintarLanzador();
-    void pintarRueda();///< x2
+    void pintarRueda();
     void pintarBrazoLanzaMisiles();
+
+    //funciones de grados de libertad
+    void mover(int parte, int sentido);
+
+    void rotarBrazo1(float ang);
 
 
 

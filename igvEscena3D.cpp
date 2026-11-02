@@ -134,3 +134,11 @@ void igvEscena3D::set_ejes(bool _ejes)
 {
     ejes = _ejes;
 }
+
+void igvEscena3D::mover(int parte, int sentido)
+{
+    if (modelo != nullptr)
+    {
+        modelo->mover(parte, sentido);
+    }
+}

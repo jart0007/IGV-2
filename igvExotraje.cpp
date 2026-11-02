@@ -6,7 +6,25 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <math.h>
+#include<algorithm>
 
+using namespace std;
+
+/**
+ * @brief constructor de la clase
+ * @post todos los grados de libertad inicializados a 0.0f ("f" se pone para aclarar que es un float y el CLION no me grite, por que podría ser un double)
+ */
+igvExotraje::igvExotraje()
+{
+    rotBrazo1=0.0f;
+}
+
+/**
+ * @brief funcion para hacer un tubo básico (sin tapa)
+ * @param largo largo del tubo
+ * @param ancho ancho del tubo
+ * @post creacion del tubo en el centro mirando hacia el usuario con base en el plano XY y altura en el Z positivo
+ */
 void igvExotraje::pintar_tubo(float largo, float ancho)
 {
     GLUquadricObj* tubo;
@@ -26,6 +44,9 @@ void igvExotraje::pintar_tubo(float largo, float ancho)
 
     gluDeleteQuadric(tubo);
 }
+
+
+/** ---------------------- Funciones para dibujar las partes del exotraje en la escena ---------------------- */
 
 void igvExotraje::pintarCuerpo(){
 
@@ -47,10 +68,10 @@ void igvExotraje::pintarCuerpo(){
 void igvExotraje::pintarBrazo1(){
 
     glPushMatrix();
-
+    /*
     glTranslatef(-0.41, 0.25, 0);
-    //abajo estan las transformaciones para modelar el objeto, arriba, para moverlo junto a el padre
-    //(todo: ¿por que aparece en el centro y no en el centro del padre como antes?, ¿es diferente a teoria TANTO?)
+    */
+    //(todo: ¿por que aparece en el centro y no en el centro del padre como antes?, ¿es diferente a teoria TANTO?) -> por que esta mal..
 
 
     //TODO qué se pone aquí #asustado (pegar a juan)
@@ -73,10 +94,6 @@ void igvExotraje::pintarBrazo1(){
 //Lo que hay debajo del brazo 1
 void igvExotraje::pintarBrazo2(){
     glPushMatrix();
-
-    glTranslatef(-0.61, 0.15, 0);
-    glRotatef(90,1,0,0);
-    //abajo estan las transformaciones para modelar el objeto, arriba, para moverlo junto a el padre
 
     glPushMatrix();
     pintar_tubo(0.4, 0.09);
@@ -110,6 +127,36 @@ void igvExotraje::pintarRueda(){
 void igvExotraje::pintarBrazoLanzaMisiles(){
 }
 
+
+/** ---------------------- Funciones para aplicar los grados de libertad a cada parte ---------------------- */
+void igvExotraje::mover(int parte, int sentido) //sentido tiene que ser "1" o "-1"
+{
+    float paso = 5.0f; // Grados por cada pulsación de tecla
+
+    switch (parte)
+    {
+    case 1: // Brazo 1
+        rotarBrazo1(sentido * paso);
+        break;
+
+        // Futuros grados de libertad:
+        // case 2: rotarBrazo2(sentido * paso); break;
+        // case 3: rotarTorreta(sentido * paso); break;
+
+    default:
+        break;
+    }
+}
+
+
+void igvExotraje::rotarBrazo1(float ang)
+{
+    rotBrazo1 = max(-60.0f, min(60.0f,rotBrazo1+ang) );
+}
+
+/**
+ * @brief funcion que dibuja el exotraje en escena
+ */
 void igvExotraje::visualizar(){
     glPushMatrix();
 
@@ -118,13 +165,26 @@ void igvExotraje::visualizar(){
 
 
     //nivel 2 (brazo1, ruedasx2, brazo-misiles,lanza cosas)
-    pintarBrazo1(); pintarRueda();
+
+    pintarRueda();
+
+    glPushMatrix();    //--------rama de brazo1->brazo2->torreta
+
+        glTranslatef(-0.41,0.25,0);
+        glRotatef(rotBrazo1, 1, 0, 0);
+        pintarBrazo1();
 
 
-    //nivel 3 (brazo2)
-    pintarBrazo2();
+        //nivel 3 (brazo2)
+        glTranslatef(-0.20,-0.10,0);
+        glRotatef(90,1,0,0);
+        pintarBrazo2();
 
-    //nivel 4 (torreta)
+        //nivel 4 (torreta)
+
+    glPopMatrix();//fin rama brazo
 
     glPopMatrix();
 }
+
+

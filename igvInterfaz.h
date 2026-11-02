@@ -23,6 +23,8 @@ class igvInterfaz
 {
 private:
     // Atributos
+    int parte=1;
+
     int ancho_ventana = 0; ///< Ancho de la ventana de visualización
     int alto_ventana = 0; ///< Alto de la ventana de visualización
 
@@ -52,6 +54,7 @@ public:
     // Métodos estáticos
     // callbacks de eventos
     // callbacks de eventos
+    static void specialFunc(int key, int x, int y);
     static void keyboardFunc(unsigned char key, int x, int y); // método para control de eventos del teclado
     static void reshapeFunc(int w, int h); // método que define la camara de vision y el viewport
     // se llama automáticamente cuando se cambia el tamaño de la ventana
