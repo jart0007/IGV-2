@@ -157,16 +157,16 @@ void igvInterfaz::specialFunc(int key, int x, int y)
     switch (key)
     {
     case GLUT_KEY_LEFT:
-        _instancia->escena.mover(_instancia->parte, -1);
+        _instancia->escena.mover(_instancia->parte, -1, false);
         break;
     case GLUT_KEY_RIGHT:
-        _instancia->escena.mover(_instancia->parte, +1);
+        _instancia->escena.mover(_instancia->parte, +1, false);
         break;
     case GLUT_KEY_UP:
-        _instancia->escena.mover(_instancia->parte, +1);
+        _instancia->escena.mover(_instancia->parte, +1, true);
         break;
     case GLUT_KEY_DOWN:
-        _instancia->escena.mover(_instancia->parte, -1);
+        _instancia->escena.mover(_instancia->parte, -1, true);
         break;
     }
 

@@ -47,7 +47,7 @@ public:
         return malla;
     }
 
-    void mover(int parte,int num);
+    void mover(int parte, int num, bool ejeY);
 
     // Apartado A: métodos para incrementar los ángulos
     void incrX() {

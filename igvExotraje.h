@@ -31,7 +31,7 @@ public:
     void pintarBrazoLanzaMisiles();
 
     //funciones de grados de libertad
-    void mover(int parte, int sentido);
+    void mover(int parte, int sentido, bool ejeY);
 
     void rotarBrazo1(float ang);
 

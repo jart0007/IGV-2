@@ -129,13 +129,19 @@ void igvExotraje::pintarBrazoLanzaMisiles(){
 
 
 /** ---------------------- Funciones para aplicar los grados de libertad a cada parte ---------------------- */
-void igvExotraje::mover(int parte, int sentido) //sentido tiene que ser "1" o "-1"
+
+
+/**
+ * @param sentido tiene que ser -1 o 1, define el sentido positivo o negativo de la accion
+ * @param ejeY booleano que nos dice si queremos movernos por el ejeY (como subir o bajar) o el ejeX(ir a der-izq o hacer un cabeceo:= util para el lanza estratagemas y el cuerpo)
+ */
+void igvExotraje::mover(int parte, int sentido, bool ejeY)
 {
     float paso = 5.0f; // Grados por cada pulsación de tecla
 
     switch (parte)
     {
-    case 1: // Brazo 1
+    case 2: // Brazo 1
         rotarBrazo1(sentido * paso);
         break;
 
