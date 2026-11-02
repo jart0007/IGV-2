@@ -17,6 +17,8 @@ using namespace std;
 igvExotraje::igvExotraje()
 {
     rotBrazo1=0.0f;
+    mvCuerpo=0.0f;
+    rotCuerpo=0.0f;
 }
 
 /**
@@ -137,12 +139,24 @@ void igvExotraje::pintarBrazoLanzaMisiles(){
  */
 void igvExotraje::mover(int parte, int sentido, bool ejeY)
 {
-    float paso = 5.0f; // Grados por cada pulsación de tecla
+    float paso = 0.5f; //para traslaciones
+    float grado = 5.0;// Grados por cada pulsación de tecla (para rotaciones)
 
     switch (parte)
     {
+    case 1: // cuerpo
+        if (!(ejeY)){
+            rotarCuerpo(sentido*grado);
+        }else{
+            moverCuerpo(paso*sentido);
+        }
+        break;
+
     case 2: // Brazo 1
-        rotarBrazo1(sentido * paso);
+        rotarBrazo1(sentido * grado);
+        break;
+    case 3: //brazo 2
+        rotarBrazo2(sentido * grado);
         break;
 
         // Futuros grados de libertad:
@@ -155,9 +169,25 @@ void igvExotraje::mover(int parte, int sentido, bool ejeY)
 }
 
 
+void igvExotraje::moverCuerpo(float num)
+{
+    mvCuerpo += num;
+}
+
+void igvExotraje::rotarCuerpo(float ang)
+{
+    if (ang+rotCuerpo==360) rotCuerpo = 0;
+    else rotCuerpo+=ang;
+}
+
 void igvExotraje::rotarBrazo1(float ang)
 {
     rotBrazo1 = max(-60.0f, min(60.0f,rotBrazo1+ang) );
+}
+
+void igvExotraje::rotarBrazo2(float ang)
+{
+    rotBrazo2 = max(-30.0f,min(30.0f,rotBrazo2+ang) );
 }
 
 /**
@@ -167,8 +197,9 @@ void igvExotraje::visualizar(){
     glPushMatrix();
 
     //nivel 1 (cuerpo)
+    glTranslated(0,0,mvCuerpo);
+    glRotatef(rotCuerpo,0,1,0);
     pintarCuerpo();
-
 
     //nivel 2 (brazo1, ruedasx2, brazo-misiles,lanza cosas)
 
@@ -177,13 +208,17 @@ void igvExotraje::visualizar(){
     glPushMatrix();    //--------rama de brazo1->brazo2->torreta
 
         glTranslatef(-0.41,0.25,0);
-        glRotatef(rotBrazo1, 1, 0, 0);
+
+        glRotatef(-rotBrazo1, 1, 0, 0);
         pintarBrazo1();
 
 
         //nivel 3 (brazo2)
+    
         glTranslatef(-0.20,-0.10,0);
         glRotatef(90,1,0,0);
+
+        glRotatef(rotBrazo2,0,0,1);
         pintarBrazo2();
 
         //nivel 4 (torreta)

@@ -15,7 +15,10 @@
 
 class igvExotraje{
 private:
+    float mvCuerpo;
+    float rotCuerpo;
     float rotBrazo1;
+    float rotBrazo2;
 public:
     igvExotraje();
     ~igvExotraje() = default;
@@ -33,8 +36,10 @@ public:
     //funciones de grados de libertad
     void mover(int parte, int sentido, bool ejeY);
 
+    void moverCuerpo(float num);
+    void rotarCuerpo(float ang);
     void rotarBrazo1(float ang);
-
+    void rotarBrazo2(float ang);
 
 
     //metodo para visualizar todo el modelo
