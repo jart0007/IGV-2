@@ -37,6 +37,7 @@ public:
     // M�todos
     // m�todo con las llamadas OpenGL para visualizar la escena
     void visualizar();
+    void visualizarVB();
 
     bool get_ejes();
 
@@ -48,6 +49,7 @@ public:
     }
 
     void mover(int parte, int num, bool ejeY);
+    void arrastrar(int parte, int dx, int dy);
 
     // Apartado A: métodos para incrementar los ángulos
     void incrX() {

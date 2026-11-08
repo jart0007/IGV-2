@@ -97,10 +97,7 @@ void igvEscena3D::visualizar(void)
 
 
     // Apartado B: la siguiente llamada hay que sustituirla por la llamada al método visualizar de la malla
-    /*GLUquadric* cyl = gluNewQuadric();
-    gluCylinder(cyl, 1, 1, 1, 20, 5);
-    gluDeleteQuadric(cyl);
-    cyl=nullptr;*/
+
     glTranslatef(-1,0,-1);
     malla->visualizar();
 
@@ -113,6 +110,20 @@ void igvEscena3D::visualizar(void)
 
     glPopMatrix();
 }
+
+
+/**
+ * M�todo para la visualizaci�n del modelo sin luces (se utiliza durante la
+ * selecci�n)
+ */
+void igvEscena3D::visualizarVB()
+{
+    glPushMatrix();
+    //crear el modelo articulado
+    modelo->visualizar();
+    glPopMatrix();
+}
+
 
 /**
  * M�todo para consultar si hay que dibujar los ejes o no
@@ -140,5 +151,13 @@ void igvEscena3D::mover(int parte, int sentido, bool ejeY)
     if (modelo != nullptr)
     {
         modelo->mover(parte, sentido, ejeY);
+    }
+}
+
+void igvEscena3D::arrastrar(int parte, int dx, int dy)
+{
+    if (modelo != nullptr)
+    {
+        modelo->arrastrar(parte, dx, dy);
     }
 }

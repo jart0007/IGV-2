@@ -16,14 +16,29 @@
 #include "igvEscena3D.h"
 #include "igvCamara.h"
 
+enum modoInterfaz
+{
+    IGV_VISUALIZAR, ///< se visualiza de forma normal la escena, con el robot la lampara y esas cosas
+    IGV_SELECCIONAR ///< modo seleccion por color (cuando se hace click en la escena)
+};
+
 /**
  * Los objetos de esta clase encapsulan la interfaz y el estado de la aplicación
  */
 class igvInterfaz
 {
 private:
-    // Atributos
+    // Atributos modelo articulado
     int parte=1;
+
+    //atributos seleccion por color
+    modoInterfaz modo = IGV_VISUALIZAR;
+    int cursorX = 0; /**< Coordenada X. pixel de la pantalla sobre el que esta situado
+                           el raton para pulsar o arrastrar */
+    int cursorY = 0; ///< ^|\/|^ lo mismo pero en Y
+    int parte_seleccionada =-1; ///< Identificador de objeto seleccionado
+    bool boton_retenido = false; ///< Indica si el boton esta pulsado (true) o soltado
+
 
     int ancho_ventana = 0; ///< Ancho de la ventana de visualización
     int alto_ventana = 0; ///< Alto de la ventana de visualización
@@ -59,6 +74,8 @@ public:
     static void reshapeFunc(int w, int h); // método que define la camara de vision y el viewport
     // se llama automáticamente cuando se cambia el tamaño de la ventana
     static void displayFunc(); // método para visualizar la escena
+    static void mouseFunc(GLint boton, GLint estado, GLint x, GLint y);
+    static void motionFunc(GLint x, GLint y);
     void inicializarMenu();
     static void menuHandle(int valor);
 

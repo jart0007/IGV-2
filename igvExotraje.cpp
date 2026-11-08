@@ -216,6 +216,10 @@ void igvExotraje::pintarBrazoLanzaMisiles(){
 
 /** ---------------------- Funciones para aplicar los grados de libertad a cada parte ---------------------- */
 
+void igvExotraje::arrastrar(int parte, int dx, int dy)
+{
+    //todo
+}
 
 /**
  * @param sentido tiene que ser -1 o 1, define el sentido positivo o negativo de la accion

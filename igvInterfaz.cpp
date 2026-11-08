@@ -199,21 +199,79 @@ void igvInterfaz::reshapeFunc(int w, int h)
 void igvInterfaz::displayFunc()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // borra la ventana y el z-buffer
-
-    // se establece el viewport
     glViewport(0, 0, _instancia->get_ancho_ventana(), _instancia->get_alto_ventana());
 
-    // establece los par�metros de la c�mara y de la proyecci�n
-    _instancia->camara.aplicar();
+    if (_instancia->modo == IGV_SELECCIONAR)
+    {
 
-    //visualiza la escena
-    _instancia->escena.visualizar();
+        glDisable(GL_LIGHTING);
+        glDisable(GL_DITHER);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // refresca la ventana
-    glutSwapBuffers(); // se utiliza, en vez de glFlush(), para evitar el parpadeo
+        _instancia->camara.aplicar();
+        _instancia->escena.visualizarVB();
+
+        GLubyte pixel[3];
+        glReadPixels(_instancia->cursorX, _instancia->alto_ventana - 1 - _instancia->cursorY, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+        //todo parte de geminis, que lo termine y lo entregüe
+        _instancia->parte =
+
+
+    } else {
+        _instancia->camara.aplicar();
+
+        _instancia->escena.visualizar();
+
+        // refresca la ventana
+        glutSwapBuffers(); // se utiliza, en vez de glFlush(), para evitar el parpadeo
+    }
 }
 
+void igvInterfaz::mouseFunc(GLint boton,GLint estado, GLint x, GLint y)
+{
+    //comprobamos si se ha pulsado el boton
+    if (boton == GLUT_LEFT_BUTTON)
+    {
+        //guardamos que el boton se ha presionado o soltado.
+        // si se ha presionado se pasa al modo seleccionar
+        if (estado == GLUT_DOWN)
+        {
+            _instancia -> boton_retenido = true;
+            _instancia -> modo = IGV_SELECCIONAR;
+        }
+        if (estado == GLUT_UP)
+        {
+            _instancia -> boton_retenido = false;
+        }
 
+        //guardar el pixel pulsado
+        _instancia->cursorX = x;
+        _instancia->cursorY = y;
+
+        //renovar el contenido dela pantalla de vision
+        glutPostRedisplay();
+    }
+}
+
+void igvInterfaz::motionFunc(GLint x, GLint y)
+{
+    /*
+     * si el boton esta retenido y hay algun objeto seleccionado
+     * comprobar el objeto seleccionado y la posicon del raton y actualziar
+     * convenientemente el grado de libertad del objeto correspondiente
+     */
+    if (_instancia->boton_retenido)
+    {
+        if (_instancia->parte_seleccionada>=0){
+            int dx = x - _instancia->cursorX;
+            int dy = _instancia->cursorY - y;
+            _instancia->escena.arrastrar(_instancia->parte,dx,dy);
+            _instancia->cursorX = x; _instancia->cursorY = y;
+            glutPostRedisplay();
+        }
+    }
+}
 
 
 /**
@@ -257,6 +315,10 @@ void igvInterfaz::inicializa_callbacks()
     glutReshapeFunc(reshapeFunc);
     glutDisplayFunc(displayFunc);
     glutSpecialFunc(specialFunc);
+
+    //Añadido para buffer de color
+    glutMouseFunc(mouseFunc);
+    glutMotionFunc(motionFunc);
 }
 
 /**

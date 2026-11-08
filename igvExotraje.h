@@ -34,6 +34,7 @@ public:
     void pintarLanzador();
     void pintarRueda();
     void pintarBrazoLanzaMisiles();
+    void arrastrar(int parte, int dx, int dy);
 
     //funciones de grados de libertad
     void mover(int parte, int sentido, bool ejeY);
