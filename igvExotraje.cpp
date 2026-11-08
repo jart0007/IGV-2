@@ -16,9 +16,12 @@ using namespace std;
  */
 igvExotraje::igvExotraje()
 {
-    rotBrazo1=0.0f;
-    mvCuerpo=0.0f;
-    rotCuerpo=0.0f;
+    rotBrazo1 = 0.0f;
+    rotBrazo2 = 0.0f;
+    mvCuerpo = 0.0f;
+    rotCuerpo = 0.0f;
+    rotLanzadorY = 0.0f;
+    rotBrazoMisilesY = 0.0f;
 }
 
 /**
@@ -54,6 +57,7 @@ void igvExotraje::pintarCuerpo(){
 
     //TODO preguntar si es asi
 
+    //cuerpo
     glPushMatrix();
     glScalef(0.5, 1, 0.75);
     glutSolidCube(1);
@@ -64,6 +68,19 @@ void igvExotraje::pintarCuerpo(){
     glTranslatef(-0.33, 0.25, 0);
     glScalef(0.16, 0.20, 0.20);
     glutSolidCube(1);
+    glPopMatrix();
+
+    //Cara
+    glPushMatrix();
+    glTranslatef(0, 0.25, 0.375);
+    glutSolidSphere(0.15,20,20);
+    glPopMatrix();
+
+    //antenas
+    glPushMatrix();
+    glTranslatef(0.12,0.5,-0.1);
+    glRotatef(-90,1,0,0);
+    pintar_tubo(0.5,0.005);
     glPopMatrix();
 }
 
@@ -80,12 +97,11 @@ void igvExotraje::pintarBrazo1(){
 
     //tubo que rota arriba y abajo el brazo
     glPushMatrix();
-    glRotatef(-90, 0, 1, 0);
     pintar_tubo(0.33, 0.09);
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(-0.20,0, 0);
+    glTranslatef(0,0, 0.20);
     glScalef(0.20, 0.20, 0.20);
     glutSolidCube(1);
     glPopMatrix();
@@ -103,7 +119,7 @@ void igvExotraje::pintarBrazo2(){
 
     glPushMatrix();
     glTranslatef(0,0,0.5);
-    glScalef(0.25, 0.25, 0.25);
+    glScalef(0.25, 0.40, 0.25);
     glutSolidCube(1);
     glPopMatrix();
 
@@ -111,9 +127,34 @@ void igvExotraje::pintarBrazo2(){
 }
 
 void igvExotraje::pintarTorreta(){
+    glPushMatrix();
+
+    glPushMatrix();
+    pintar_tubo(0.40, 0.05);
+    glPopMatrix();
+
+    glPopMatrix();
+
+
+
+    // todo shawty like a melody in my head that I can't get out got me singing like nanananana everyday is like an iPad stuck on replay (ay)
+
 }
 
 void igvExotraje::pintarLanzador(){
+    glPushMatrix();
+
+        glPushMatrix();
+        glutSolidSphere(0.07,20,20);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(0,0.03,0.03);
+        glRotatef(-45,1,0,0);
+        pintar_tubo(0.15,0.04);
+        glPopMatrix();
+
+    glPopMatrix();
 }
 
 void igvExotraje::pintarRueda(){
@@ -127,6 +168,49 @@ void igvExotraje::pintarRueda(){
 }
 
 void igvExotraje::pintarBrazoLanzaMisiles(){
+    glPushMatrix();
+
+        glPushMatrix();
+        glScalef(0.3,0.5,0.4);
+        glutSolidCube(1);
+        glPopMatrix();
+
+        //tendrá 6 misiles
+        // misiles izq
+        glPushMatrix();
+        glTranslatef(-0.08,0.15,0.20);
+        glutSolidSphere(0.05,20,20);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(-0.08,-0.15,0.20);
+        glutSolidSphere(0.05,20,20);
+        glPopMatrix();
+
+        //misiles der
+        glPushMatrix();
+        glTranslatef(0.08,0.15,0.20);
+        glutSolidSphere(0.05,20,20);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(0.08,-0.15,0.20);
+        glutSolidSphere(0.05,20,20);
+        glPopMatrix();
+
+        //misiles del medio
+        glPushMatrix();
+        glTranslatef(0.08,0,0.20);
+        glutSolidSphere(0.05,20,20);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(-0.08,0,0.20);
+        glutSolidSphere(0.05,20,20);
+        glPopMatrix();
+
+    glPopMatrix();
+
 }
 
 
@@ -159,9 +243,14 @@ void igvExotraje::mover(int parte, int sentido, bool ejeY)
         rotarBrazo2(sentido * grado);
         break;
 
-        // Futuros grados de libertad:
-        // case 2: rotarBrazo2(sentido * paso); break;
-        // case 3: rotarTorreta(sentido * paso); break;
+    //Brazo lanzamisiles
+    case 4:
+        rotarBrazoMisilesY(sentido * grado);
+        break;
+
+    case 5: //lanza cosas
+        rotarLanzadorY(sentido * grado);
+        break;
 
     default:
         break;
@@ -190,6 +279,18 @@ void igvExotraje::rotarBrazo2(float ang)
     rotBrazo2 = max(-30.0f,min(30.0f,rotBrazo2+ang) );
 }
 
+void igvExotraje::rotarBrazoMisilesY(float ang)
+{
+    rotBrazoMisilesY = max(-70.0f,min(20.f,rotBrazoMisilesY+ang));
+}
+
+
+void igvExotraje::rotarLanzadorY(float ang) {
+    rotLanzadorY = max(-35.0f,min(0.5f ,rotLanzadorY+ang) );
+
+}
+
+
 /**
  * @brief funcion que dibuja el exotraje en escena
  */
@@ -207,23 +308,40 @@ void igvExotraje::visualizar(){
 
     glPushMatrix();    //--------rama de brazo1->brazo2->torreta
 
-        glTranslatef(-0.41,0.25,0);
 
+        glTranslatef(-0.41,0.25,0);
         glRotatef(-rotBrazo1, 1, 0, 0);
+        glRotatef(-90, 0, 1, 0); //Esto invierte los ejes X y Z
         pintarBrazo1();
+
+        glRotatef(90, 0, 1, 0); //Deshacemos la inversión
+
 
 
         //nivel 3 (brazo2)
-    
-        glTranslatef(-0.20,-0.10,0);
+        glTranslatef(-0.20,0,0);
         glRotatef(90,1,0,0);
-
-        glRotatef(rotBrazo2,0,0,1);
+        glRotatef(rotBrazo2,0,0,1); //grado de libertad
         pintarBrazo2();
 
+        glRotatef(-90,1,0,0); //Deshacemos la inversion del eje
+
         //nivel 4 (torreta)
+        glTranslatef(0,-0.43,0.20);
+        pintarTorreta();
 
     glPopMatrix();//fin rama brazo
+
+
+    glPushMatrix(); //brazo lanza-misiles (para que no afecte al lanzador)
+        glTranslatef(0.4, 0.2, 0);
+        glRotatef(rotBrazoMisilesY, 1, 0, 0);
+        pintarBrazoLanzaMisiles();
+    glPopMatrix();
+
+    glTranslatef(-0.34,0.35,0);
+    glRotatef(rotLanzadorY, 1, 0, 0);
+    pintarLanzador();
 
     glPopMatrix();
 }

@@ -19,6 +19,8 @@ private:
     float rotCuerpo;
     float rotBrazo1;
     float rotBrazo2;
+    float rotLanzadorY;
+    float rotBrazoMisilesY;
 public:
     igvExotraje();
     ~igvExotraje() = default;
@@ -40,6 +42,8 @@ public:
     void rotarCuerpo(float ang);
     void rotarBrazo1(float ang);
     void rotarBrazo2(float ang);
+    void rotarLanzadorY(float ang);
+    void rotarBrazoMisilesY(float ang);
 
 
     //metodo para visualizar todo el modelo

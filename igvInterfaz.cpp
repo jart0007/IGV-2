@@ -3,6 +3,8 @@
 
 #include "igvInterfaz.h"
 
+#include <iostream>
+
 // Aplicaci�n del patr�n de dise�o Singleton
 igvInterfaz* igvInterfaz::_instancia = nullptr;
 
@@ -145,7 +147,7 @@ void igvInterfaz::keyboardFunc(unsigned char key, int x, int y)
         exit(1);
         break;
 
-    case '1': case '2': case '3': case '4': //ir añadiendo casos para cada glado de libertad
+    case '1': case '2': case '3': case '4': case '5': //ir añadiendo casos para cada glado de libertad
         _instancia->parte = key -'0';
         break;
     }
