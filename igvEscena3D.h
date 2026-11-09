@@ -12,6 +12,14 @@
 
 #endif // defined(__APPLE__) && defined(__MACH__)
 
+struct Transformaciones
+{
+    float tx = 0, ty = 0, tz = 0; ///< traslacion acumulada
+    float rx=0, ry=0, rz = 0; ///< ángulos acumulados (en grados)
+    float s=1; ///< escala acumulada
+};
+
+
 #include "igvMallaTriangulos.h"
 
 /**
@@ -19,9 +27,17 @@
  */
 class igvEscena3D
 {
+public:
+    const int Objeto1 = 1; ///< Identificador interno del objeto 1
+    const int Objeto2 = 2; ///< Identificador interno del objeto 2
+    const int Objeto3 = 3; ///< Identificador interno del objeto 3
+
 private:
     // Atributos
     bool ejes = true; ///< Indica si hay que dibujar los _ejes coordenados o no
+
+    Transformaciones obj[3];
+    int seleccionado = 0;
 
     // TODO: Apartado A: A�adir aqu� los atributos con los �ngulos de rotaci�n en X, Y y Z.
     double rotX=0, rotY=0, rotZ=0;
@@ -35,6 +51,10 @@ public:
     ~igvEscena3D();
 
     // M�todos
+    void trasladar(float x, float y, float z);
+    void rotar(float drx, float dry, float drz);
+    void escalar(float factor);
+
     // m�todo con las llamadas OpenGL para visualizar la escena
     void visualizar(bool sel = false);
     void visualizarVB();
@@ -43,6 +63,10 @@ public:
     int parte_de_color(GLubyte pixel[3]){return modelo ? modelo->parte_de_color(pixel) : 0;} //if inline
     void set_seleccionada(int parte){ if (modelo) modelo->set_seleccionada(parte);}
     bool get_ejes();
+
+    void set_seleccionadoObjeto(int seleccionado);
+
+    void animar(float dt) { if (modelo) modelo->animar(dt); }
 
     void set_ejes(bool _ejes);
 
@@ -81,6 +105,10 @@ public:
 
 private:
     void pintar_ejes();
+
+    void renderObjeto1();
+    void renderObjeto2();
+    void renderObjeto3();
 };
 
 #endif   // __IGVESCENA3D

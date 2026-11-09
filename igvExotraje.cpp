@@ -370,6 +370,24 @@ void igvExotraje::rotarLanzadorY(float ang) {
 
 }
 
+/**
+ * @brief Actualiza los grados de libertad en función del tiempo transcurrido (dt)
+ * @param dt Tiempo en segundos desde el último fotograma
+ */
+void igvExotraje::animar(float dt)
+{
+    fase += dt;
+
+    // Movimientos del cuerpo (Avance y Giro)
+    mvCuerpo  = 1.5f * sin(0.35f * fase);
+    rotCuerpo = 60.0f * sin(0.6f * fase);
+
+    // Animación de articulaciones respetando sus límites
+    rotBrazo1        = max(-60.0f, min(60.0f, 40.0f * sin(0.9f * fase)));
+    rotBrazo2        = max(-30.0f, min(30.0f, 25.0f * sin(1.3f * fase)));
+    rotBrazoMisilesY = max(-70.0f, min(20.0f, -25.0f + 45.0f * sin(1.1f * fase)));
+    rotLanzadorY     = max(-35.0f, min(0.5f, -17.25f + 17.25f * sin(1.8f * fase)));
+}
 
 /**
  * @brief funcion que dibuja el exotraje en escena
@@ -443,5 +461,3 @@ void igvExotraje::visualizar(bool sel){
     
     glPopMatrix();
 }
-
-

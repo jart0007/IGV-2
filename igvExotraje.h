@@ -23,6 +23,8 @@ private:
     float rotBrazo2;
     float rotLanzadorY;
     float rotBrazoMisilesY;
+
+    float fase = 0.0f; ///< Acumulador de tiempo para animaciones sinusoidales en tiempo real
 public:
     igvExotraje();
     ~igvExotraje() = default;
@@ -35,6 +37,8 @@ public:
 
     void arrastrar(int parte, int dx, int dy); ///< como el método mover pero por raton y no por teclado
 
+
+    void animar(float dt); ///< para la animacion del modelo automatico
 
     //funciones para pintar el exotraje
     void pintar_tubo(float largo, float ancho);

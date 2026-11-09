@@ -87,6 +87,10 @@ class igvCamara
                              // asociadas a los parámetros de la cámara
       void zoom ( double factor ); // realiza un zoom sobre la cámara
       void orbita(double num);
+      void cabeceo(double num);
+      void rotacionY(double num);
+      void moverZnear(double num);
+      void moverZfar(double num);
 };
 
 #endif   // __IGVCAMARA

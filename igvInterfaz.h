@@ -22,6 +22,23 @@ enum modoInterfaz
     IGV_SELECCIONAR ///< modo seleccion por color (cuando se hace click en la escena)
 };
 
+
+enum Vista
+{
+    PLANTA ///< Vista de planta (cámara en el eje Y)
+    , ALZADO ///< Vista de alzado (cámara en el eje Z)
+    , PERFIL ///< Vista de perfil (cámara en el eje X)
+    , OTRA ///< Otro tipo de vista
+};
+
+enum ModoInteraccion
+{
+    MODO_P1,      ///< Transformaciones P1 (trasladar/rotar/escalar objeto entero)[cite: 30, 38]
+    MODO_TECLADO, ///< Articulaciones por teclado (1..5 + cursores)[cite: 37, 38]
+    MODO_RATON,   ///< Selección por color y arrastre con ratón[cite: 37, 38]
+    MODO_CAMARA   ///< Control manual de la cámara[cite: 37, 38]
+};
+
 /**
  * Los objetos de esta clase encapsulan la interfaz y el estado de la aplicación
  */
@@ -30,6 +47,9 @@ class igvInterfaz
 private:
     // Atributos modelo articulado
     int parte=1;
+    ModoInteraccion modoInteraccion = MODO_TECLADO; ///< Modo por defecto[cite: 37]
+    bool verPlanta = true;                          ///< Controla la vista secundaria de planta[cite: 37]
+    int tipo = 1;
 
     //atributos seleccion por color
     modoInterfaz modo = IGV_VISUALIZAR;
@@ -39,19 +59,39 @@ private:
     int parte_seleccionada =-1; ///< Identificador de objeto seleccionado
     bool boton_retenido = false; ///< Indica si el boton esta pulsado (true) o soltado
 
+    bool animar_modelo = false;  ///< Controla si la animación del mecha está activa
+    bool orbitar_camara = false; ///< Controla si la órbita automática de la cámara está activa[cite: 34, 35]
+    int t_prev = 0;              ///< Guarda el tiempo de GLUT del fotograma anterior en ms
 
     int ancho_ventana = 0; ///< Ancho de la ventana de visualización
     int alto_ventana = 0; ///< Alto de la ventana de visualización
 
     igvEscena3D escena; ///< Escena que se visualiza en la ventana definida por igvInterfaz
     igvCamara camara; ///< Cámara que se utiliza para visualizar la escena
+    igvCamara camaraPlanta;
+
+    igvPunto3D p0 = {0, 0, 0} ///< Posición de la cámara
+    , r = {0, 0, 0} ///< Punto de referencia para las vistas
+    , V = {0, 0, 0} ///< Vector que indica la vertical en la vista
+    ;
+
+    igvPunto3D p0p = {0, 0, 0} ///< Posición de la cámara
+    , rp = {0, 0, 0} ///< Punto de referencia para las vistas
+    , Vp = {0, 0, 0} ///< Vector que indica la vertical en la vista
+    ;
 
     int menuSelection = 0; ///< elegir entre plano "GL_FALT" o interpolado "GL_SMOOTH/Gouraud"
 
     typedef enum
     {
-        M_PLANO,M_GOURAUD
+        M_PLANO, M_GOURAUD,
+        M_TRANS_P1, M_TECLADO, M_RATON, M_CAMARA_MODO,
+        M_ANIMAR_MODELO, M_ORBITAR_CAMARA,
+        M_PROYECCION, M_PLANTA, M_REINICIAR_CAMARA,
+        M_AYUDA, M_SALIR
     } OpcionesMenu;
+
+
 
     // Aplicación del patrón de diseño Singleton
     static igvInterfaz* _instancia; ///< Dirección de memoria del objeto único de la clase
@@ -76,6 +116,8 @@ public:
     static void displayFunc(); // método para visualizar la escena
     static void mouseFunc(GLint boton, GLint estado, GLint x, GLint y);
     static void motionFunc(GLint x, GLint y);
+    static void idleFunc(); //Callback para animacion continua
+
     void inicializarMenu();
     static void menuHandle(int valor);
 

@@ -1,6 +1,5 @@
 //#include <GL/glut.h>
 #include <math.h>
-
 #include "igvCamara.h"
 
 // Métodos constructores
@@ -126,7 +125,22 @@ void igvCamara::aplicar ( void )
  * @pre Se asume que el parámetro tiene un valor válido
  */
 void igvCamara::zoom ( double factor )
-{ }
+{
+    if (tipo == IGV_PARALELA)
+   {
+      xwmin *= factor;
+      xwmax *= factor;
+      ywmin *= factor;
+      ywmax *= factor;
+   }
+   else if (tipo == IGV_PERSPECTIVA)
+   {
+      angulo*=factor;
+
+      if (angulo < 1.0)   angulo = 1.0;
+      if (angulo > 179.0) angulo = 179.0;
+   }
+}
 
 
 void igvCamara::orbita(double num)
@@ -143,4 +157,70 @@ void igvCamara::orbita(double num)
 
    P0[X] = r[X] + radio*sin(nuevo_ang);
    P0[Z] = r[Z] + radio*cos(nuevo_ang);
+}
+
+
+void igvCamara::cabeceo(double num)
+{
+   double rad = num * (M_PI / 180.0);
+
+   // 1. Vector de visión 3D completo
+   double dx = r[X] - P0[X];
+   double dy = r[Y] - P0[Y];
+   double dz = r[Z] - P0[Z];
+
+   // 2. Distancia horizontal en el plano XZ y radio 3D total
+   double dxz = sqrt(dx * dx + dz * dz); /// calculo del eje x local
+   double radio = sqrt(dxz * dxz + dy * dy);
+
+   // 3. Ángulo de elevación actual (Pitch) respecto al plano horizontal
+   double ang_ant = atan2(dy, dxz);
+   double ang_nuevo = ang_ant + rad;
+
+   // 4. Nueva altura (Y) y nueva proyección horizontal (R_xz)
+   double dy_nuevo = radio * sin(ang_nuevo);
+   double dxz_nuevo = radio * cos(ang_nuevo);
+
+   // 5. Mantenemos la dirección horizontal original escalando X y Z proporcionalmente
+   // (evita que la cámara se desvíe a los lados)
+   double factor_escala = dxz_nuevo / dxz;
+
+   if (!(dxz_nuevo < IGV_EPSILON)) //otra forma de hacer la comparacion: (angulo_nuevo > (89.0*M_PI/180)) y lo mismo para menor que. Para que no pase de 90 grados en vertical el cabeceo de la camara
+   {
+      r[X] = P0[X] + dx * factor_escala;
+      r[Y] = P0[Y] + dy_nuevo;
+      r[Z] = P0[Z] + dz * factor_escala;
+   }///< el if sirve para que si la camara mira en vertical, no se aplica
+}
+
+
+void igvCamara::rotacionY(double num)
+{
+   double rad = num * (M_PI / 180.0);
+
+   // 1. Vector de visión d = r - P0
+   double dx = r[X] - P0[X];
+   double dz = r[Z] - P0[Z];
+
+   double radio = sqrt(dx * dx + dz * dz);
+   double ang_act = atan2(dx, -dz); // Ángulo  respecto al eje -Z
+   double ang_nuevo = ang_act + rad;
+
+   // dirx = radio * sin(pan), dirz = -radio * cos(pan)
+
+   // objetivo = posCamara + vDir
+   r[X] = P0[X] + radio * sin(ang_nuevo);
+   r[Z] = P0[Z] + -radio * cos(ang_nuevo);
+}
+
+
+void igvCamara::moverZnear(double num)
+{
+   znear += num;
+}
+
+
+void igvCamara::moverZfar(double num)
+{
+   zfar += num;
 }

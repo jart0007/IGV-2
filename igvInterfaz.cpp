@@ -15,7 +15,7 @@ igvInterfaz::igvInterfaz() = default;
 
 /**
  * M�todo para acceder al objeto �nico de la clase, en aplicaci�n del patr�n de
- * dise�o Singleton
+ * diseño Singleton
  * @return Una referencia al objeto �nico de la clase
  */
 igvInterfaz& igvInterfaz::getInstancia()
@@ -37,6 +37,16 @@ void igvInterfaz::crear_mundo()
     _instancia->camara.set(IGV_PARALELA, {3.0, 2.0, 4}, {0, 0, 0}
                            , {0, 1.0, 0}, -1 * 1.5, 1 * 1.5, -1 * 1.5, 1 * 1.5
                            , -1 * 3, 200);
+
+
+    //Camara de perspectiva de planta
+    p0p = igvPunto3D(0, 5, 0);
+    rp = igvPunto3D(0, 0, 0);
+    Vp = igvPunto3D(0, 0, -1);
+
+    _instancia->camaraPlanta.set(IGV_PARALELA, p0p, rp, Vp, -1 * 3, 1 * 3, -1 * 3, 1 * 3, 1, 200);
+
+
 }
 
 /**
@@ -99,76 +109,157 @@ void igvInterfaz::inicia_bucle_visualizacion()
  * @pre Se asume que todos los par�metros tienen valores v�lidos
  * @post Los atributos de la clase pueden cambiar, dependiendo de la tecla pulsada
  */
+/**
+ * @brief Submenú de interacción y eventos del menú[cite: 37]
+ */
+void igvInterfaz::menuHandle(int valor)
+{
+    _instancia->menuSelection = valor;
+
+    switch (valor)
+    {
+    case M_PLANO:
+        _instancia->escena.getMalla()->setGouraud(false);
+        break;
+    case M_GOURAUD:
+        _instancia->escena.getMalla()->setGouraud(true);
+        break;
+
+    // --- SELECCIÓN DE MODO DE INTERACCIÓNnnnnnnN ---[cite: 37]
+    case M_TRANS_P1:
+        _instancia->modoInteraccion = MODO_P1;
+        std::cout << "[MODO] Transformaciones Práctica 1 (1: Malla, 2: Mecha)\n";
+        break;
+    case M_TECLADO:
+        _instancia->modoInteraccion = MODO_TECLADO;
+        std::cout << "[MODO] Articulaciones por Teclado\n";
+        break;
+    case M_RATON:
+        _instancia->modoInteraccion = MODO_RATON;
+        std::cout << "[MODO] Articulaciones por Ratón (Buffer de Color)\n";
+        break;
+    case M_CAMARA_MODO:
+        _instancia->modoInteraccion = MODO_CAMARA;
+        std::cout << "[MODO] Control de Cámara activado\n";
+        break;
+
+    // --- ANIMACIÓN ---[cite: 34]
+    case M_ANIMAR_MODELO:
+        _instancia->animar_modelo = !_instancia->animar_modelo;
+        if (_instancia->animar_modelo || _instancia->orbitar_camara) {
+            _instancia->t_prev = glutGet(GLUT_ELAPSED_TIME);
+            glutIdleFunc(idleFunc);
+        } else {
+            glutIdleFunc(nullptr);
+        }
+        break;
+
+    case M_ORBITAR_CAMARA:
+        _instancia->orbitar_camara = !_instancia->orbitar_camara;
+        if (_instancia->animar_modelo || _instancia->orbitar_camara) {
+            _instancia->t_prev = glutGet(GLUT_ELAPSED_TIME);
+            glutIdleFunc(idleFunc);
+        } else {
+            glutIdleFunc(nullptr);
+        }
+        break;
+
+    // --- VISTAS ---[cite: 30]
+    case M_PLANTA:
+        _instancia->verPlanta = !_instancia->verPlanta;
+        break;
+    case M_REINICIAR_CAMARA:
+        _instancia->crear_mundo();
+        break;
+
+    case M_AYUDA:
+        std::cout << "\n=== CONTROLES SEGÚN EL MODO ACTIVO ===\n";
+        std::cout << " Modo P1      : Teclas 1/2 eligen objeto. Flechas mueven, X/Y/Z rotan, S escala.\n";
+        std::cout << " Modo Teclado : Teclas 1..5 eligen parte. Flechas mueven la articulación.\n";
+        std::cout << " Modo Ratón   : Clic izq selecciona pieza (resalta amarillo), arrastrar mueve.\n";
+        std::cout << " Modo Cámara  : Flechas orbitan / cabecean la cámara.\n";
+        break;
+
+    case M_SALIR:
+        exit(0);
+        break;
+    }
+
+    glutPostRedisplay();
+}
+
+void igvInterfaz::inicializarMenu()
+{
+    int sub1 = glutCreateMenu(menuHandle);
+    glutAddMenuEntry("Plano (GL_FLAT)", M_PLANO);
+    glutAddMenuEntry("Interpolado (GL_SMOOTH)", M_GOURAUD);
+
+    int sub2 = glutCreateMenu(menuHandle);
+    glutAddMenuEntry("Transformar modelos (P1)", M_TRANS_P1);
+    glutAddMenuEntry("Articulaciones: teclado", M_TECLADO);
+    glutAddMenuEntry("Articulaciones: raton", M_RATON);
+    glutAddMenuEntry("Mover la camara", M_CAMARA_MODO);
+
+    int sub3 = glutCreateMenu(menuHandle);
+    glutAddMenuEntry("Animar modelo", M_ANIMAR_MODELO);
+    glutAddMenuEntry("Orbitar camara", M_ORBITAR_CAMARA);
+
+    int sub4 = glutCreateMenu(menuHandle);
+    glutAddMenuEntry("Perspectiva / Paralela", M_PROYECCION);
+    glutAddMenuEntry("Vista de planta", M_PLANTA);
+    glutAddMenuEntry("Reiniciar camara", M_REINICIAR_CAMARA);
+
+    glutCreateMenu(menuHandle);
+    glutAddSubMenu("Sombreado", sub1);
+    glutAddSubMenu("Interaccion", sub2);
+    glutAddSubMenu("Animacion", sub3);
+    glutAddSubMenu("Camara y vistas", sub4);
+    glutAddMenuEntry("Ayuda (teclas)", M_AYUDA);
+    glutAddMenuEntry("Salir", M_SALIR);
+
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
+/**
+ * @brief Teclado con diferenciación por modo de interacción[cite: 38]
+ */
 void igvInterfaz::keyboardFunc(unsigned char key, int x, int y)
 {
     switch (key)
     {
-    case 'x': // Apartado A: rotar X positivo
-        _instancia->escena.incrX();
+    case 'e': case 'E':
+        _instancia->escena.set_ejes(!_instancia->escena.get_ejes());
         break;
-    case 'X': // Apartado A: rotar X negativo
-        _instancia->escena.decrX();
-        break;
-    case 'y': // Apartado A: rotar Y positivo
-        _instancia->escena.incrY();
-        break;
-    case 'Y': // Apartado C: rotar y negativo
-        _instancia->escena.decrY();
-        break;
-    case 'z': // Apartado C: rotar z positivo
-        _instancia->escena.incrZ();
-        break;
-    case 'Z': // Apartado C: rotar Z negativo
-        _instancia->escena.decrZ();
-        break;
-    case 'n':
-        _instancia->escena.getMalla()->cambiarnormales();
-        break;
-    case 'N':
-        _instancia->escena.getMalla()->cambiarnormales();
-        break;
-    case 'g':
-        _instancia->escena.getMalla()->cambiarvis();
-        break;
-    case 'G':
-        _instancia->escena.getMalla()->cambiarvis();
-        break;
-    case 'r':
-        _instancia->camara.orbita(5);
-        break;
-    case 'R':
-        _instancia->camara.orbita(-5);
+    case 27:
+        exit(0);
         break;
 
-    case 'e': // activa/desactiva la visualizacion de los ejes
-         _instancia->escena.set_ejes(_instancia->escena.get_ejes() ? false : true);
-        break;
-    case 27: // tecla de escape para SALIR
-        exit(1);
-        break;
-
-    case '1': case '2': case '3': case '4': case '5': //ir añadiendo casos para cada glado de libertad
-        _instancia->parte = key -'0';
-        break;
-    }
-    glutPostRedisplay(); // renueva el contenido de la ventana de visi�n
-}
-
-void igvInterfaz::specialFunc(int key, int x, int y)
-{
-    switch (key)
-    {
-    case GLUT_KEY_LEFT:
-        _instancia->escena.mover(_instancia->parte, -1, false);
-        break;
-    case GLUT_KEY_RIGHT:
-        _instancia->escena.mover(_instancia->parte, +1, false);
-        break;
-    case GLUT_KEY_UP:
-        _instancia->escena.mover(_instancia->parte, +1, true);
-        break;
-    case GLUT_KEY_DOWN:
-        _instancia->escena.mover(_instancia->parte, -1, true);
+    default:
+        if (_instancia->modoInteraccion == MODO_P1)
+        {
+            switch (key)
+            {
+            case '1': _instancia->escena.set_seleccionadoObjeto(0); std::cout << "[P1] Objeto 1: Malla\n"; break;
+            case '2': _instancia->escena.set_seleccionadoObjeto(1); std::cout << "[P1] Objeto 2: Mecha\n"; break;
+            case 'x': _instancia->escena.rotar(10, 0, 0); break;
+            case 'X': _instancia->escena.rotar(-10, 0, 0); break;
+            case 'y': _instancia->escena.rotar(0, 10, 0); break;
+            case 'Y': _instancia->escena.rotar(0, -10, 0); break;
+            case 'z': _instancia->escena.rotar(0, 0, 10); break;
+            case 'Z': _instancia->escena.rotar(0, 0, -10); break;
+            case 's': _instancia->escena.escalar(0.1f); break;
+            case 'S': _instancia->escena.escalar(-0.1f); break;
+            }
+        }
+        else if (_instancia->modoInteraccion == MODO_TECLADO || _instancia->modoInteraccion == MODO_RATON)
+        {
+            if (key >= '1' && key <= '5')
+            {
+                _instancia->parte = key - '0';
+                _instancia->parte_seleccionada = _instancia->parte;
+                _instancia->escena.set_seleccionada(_instancia->parte);
+            }
+        }
         break;
     }
 
@@ -176,147 +267,189 @@ void igvInterfaz::specialFunc(int key, int x, int y)
 }
 
 /**
- * M�todo que define la c�mara de visi�n y el viewport. Se llama autom�ticamente
- * cuando se cambia el tama�o de la ventana.
- * @param w Nuevo ancho de la ventana
- * @param h Nuevo alto de la ventana
- * @pre Se asume que todos los par�metros tienen valores v�lidos
+ * @brief Cursores especiales diferenciados por modo de interacción[cite: 38]
  */
-void igvInterfaz::reshapeFunc(int w, int h)
+void igvInterfaz::specialFunc(int key, int x, int y)
 {
-    // dimensiona el viewport al nuevo ancho y alto de la ventana
-    // guardamos valores nuevos de la ventana de visualizaci�n
-    _instancia->set_ancho_ventana(w);
-    _instancia->set_alto_ventana(h);
+    switch (_instancia->modoInteraccion)
+    {
+    case MODO_P1:
+        switch (key)
+        {
+        case GLUT_KEY_LEFT:  _instancia->escena.trasladar(-0.1f, 0, 0); break;
+        case GLUT_KEY_RIGHT: _instancia->escena.trasladar(+0.1f, 0, 0); break;
+        case GLUT_KEY_UP:    _instancia->escena.trasladar(0, 0, -0.1f); break;
+        case GLUT_KEY_DOWN:  _instancia->escena.trasladar(0, 0, +0.1f); break;
+        }
+        break;
 
-    // establece los par�metros de la c�mara y de la proyecci�n
-    _instancia->camara.aplicar();
+    case MODO_TECLADO:
+        switch (key)
+        {
+        case GLUT_KEY_LEFT:  _instancia->escena.mover(_instancia->parte, -1, false); break;
+        case GLUT_KEY_RIGHT: _instancia->escena.mover(_instancia->parte, +1, false); break;
+        case GLUT_KEY_UP:    _instancia->escena.mover(_instancia->parte, +1, true); break;
+        case GLUT_KEY_DOWN:  _instancia->escena.mover(_instancia->parte, -1, true); break;
+        }
+        break;
+
+    case MODO_CAMARA:
+        switch (key)
+        {
+        case GLUT_KEY_LEFT:  _instancia->camara.orbita(-5); break;
+        case GLUT_KEY_RIGHT: _instancia->camara.orbita(+5); break;
+        case GLUT_KEY_UP:    _instancia->camara.cabeceo(+5); break;
+        case GLUT_KEY_DOWN:  _instancia->camara.cabeceo(-5); break;
+        }
+        break;
+
+    case MODO_RATON:
+        switch (key)
+        {
+        case GLUT_KEY_LEFT:  _instancia->escena.mover(_instancia->parte_seleccionada, -1, false); break;
+        case GLUT_KEY_RIGHT: _instancia->escena.mover(_instancia->parte_seleccionada, +1, false); break;
+        case GLUT_KEY_UP:    _instancia->escena.mover(_instancia->parte_seleccionada, +1, true); break;
+        case GLUT_KEY_DOWN:  _instancia->escena.mover(_instancia->parte_seleccionada, -1, true); break;
+        }
+        break;
+    }
+
+    glutPostRedisplay();
 }
 
-/**
- * M�todo para visualizar la escena
- */
-void igvInterfaz::displayFunc()
+void igvInterfaz::mouseFunc(GLint boton, GLint estado, GLint x, GLint y)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, _instancia->get_ancho_ventana(), _instancia->get_alto_ventana());
-
-    if (_instancia->modo == IGV_SELECCIONAR)
-    {
-        // 1. Desactivar luces y dither para obtener colores planos puros[cite: 27, 28]
-        glDisable(GL_LIGHTING);
-        glDisable(GL_DITHER);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        _instancia->camara.aplicar();
-        _instancia->escena.visualizarVB(); // Dibuja la versión con colores falsos[cite: 28]
-
-        // 2. Leer el color del píxel (con ajuste de coordenada Y en OpenGL)[cite: 27, 28]
-        GLubyte pixel[3];
-        glReadPixels(_instancia->cursorX, _instancia->alto_ventana - 1 - _instancia->cursorY,
-                     1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-
-        // 3. Traducir color a ID de parte y actualizar estado
-        int parte = _instancia->escena.parte_de_color(pixel);
-        _instancia->parte_seleccionada = parte;
-        _instancia->parte = parte; // Sincroniza la parte activa con el modo teclado
-        _instancia->escena.set_seleccionada(parte);
-
-        // 4. Restaurar estado de visualización normal
-        _instancia->modo = IGV_VISUALIZAR;
-        glEnable(GL_LIGHTING);
-        glEnable(GL_DITHER);
-
-        glutPostRedisplay(); // Redibuja inmediatamente para mostrar el resalte
-    }
-    else
-    {
-        _instancia->camara.aplicar();
-        _instancia->escena.visualizar(false);
-        glutSwapBuffers();
-    }
-}
-
-void igvInterfaz::mouseFunc(GLint boton,GLint estado, GLint x, GLint y)
-{
-    //comprobamos si se ha pulsado el boton
     if (boton == GLUT_LEFT_BUTTON)
     {
-        //guardamos que el boton se ha presionado o soltado.
-        // si se ha presionado se pasa al modo seleccionar
+        // Ignorar clic si cae en la vista secundaria de planta (cuadrante superior derecho)[cite: 31]
+        int vpMinX = _instancia->get_ancho_ventana() - _instancia->get_ancho_ventana() / 3;
+        int vpMaxY = _instancia->get_alto_ventana() / 3;
+
+        if (_instancia->verPlanta && x >= vpMinX && y <= vpMaxY)
+        {
+            return;
+        }
+
         if (estado == GLUT_DOWN)
         {
-            _instancia -> boton_retenido = true;
-            _instancia -> modo = IGV_SELECCIONAR;
+            _instancia->boton_retenido = true;
+            if (_instancia->modoInteraccion == MODO_RATON)
+            {
+                _instancia->modo = IGV_SELECCIONAR;
+            }
         }
         if (estado == GLUT_UP)
         {
-            _instancia -> boton_retenido = false;
+            _instancia->boton_retenido = false;
         }
 
-        //guardar el pixel pulsado
         _instancia->cursorX = x;
         _instancia->cursorY = y;
-
-        //renovar el contenido dela pantalla de vision
         glutPostRedisplay();
     }
 }
 
 void igvInterfaz::motionFunc(GLint x, GLint y)
 {
-    /*
-     * si el boton esta retenido y hay algun objeto seleccionado
-     * comprobar el objeto seleccionado y la posicon del raton y actualziar
-     * convenientemente el grado de libertad del objeto correspondiente
-     */
-    if (_instancia->boton_retenido)
+    if (_instancia->boton_retenido && _instancia->modoInteraccion == MODO_RATON)
     {
-        if (_instancia->parte_seleccionada>0){
+        if (_instancia->parte_seleccionada > 0)
+        {
             int dx = x - _instancia->cursorX;
             int dy = _instancia->cursorY - y;
 
-            _instancia->escena.arrastrar(_instancia->parte,dx,dy);
+            _instancia->escena.arrastrar(_instancia->parte_seleccionada, dx, dy);
 
-            _instancia->cursorX = x; _instancia->cursorY = y;
+            _instancia->cursorX = x;
+            _instancia->cursorY = y;
             glutPostRedisplay();
         }
     }
 }
 
-
-/**
- * M�todo para gestionar la selecci�n de opciones de men�
- * @param value Nueva opci�n seleccionada
- * @pre Se asume que el valor del par�metro es correcto
- * @post Se almacena en el objeto la opci�n seleccionada
- */
-void igvInterfaz::menuHandle ( int valor )
+void igvInterfaz::displayFunc()
 {
-    _instancia->menuSelection = valor;
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    switch (valor)
+    if (_instancia->modo == IGV_SELECCIONAR)
     {
-        case M_PLANO:
-                _instancia->escena.getMalla()->setGouraud(false);
-                break;
+        glDisable(GL_LIGHTING);
+        glDisable(GL_DITHER);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        case M_GOURAUD:
-            _instancia->escena.getMalla()->setGouraud(true);
-            break;
+        _instancia->camara.aplicar();
+        _instancia->escena.visualizarVB();
+
+        GLubyte pixel[3];
+        glReadPixels(_instancia->cursorX, _instancia->alto_ventana - 1 - _instancia->cursorY,
+                     1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+        int parte = _instancia->escena.parte_de_color(pixel);
+        _instancia->parte_seleccionada = parte;
+        _instancia->parte = parte;
+        _instancia->escena.set_seleccionada(parte);
+
+        _instancia->modo = IGV_VISUALIZAR;
+        glEnable(GL_LIGHTING);
+        glEnable(GL_DITHER);
+
+        glutPostRedisplay();
     }
+    else
+    {
+        // 1. Viewport Principal
+        glViewport(0, 0, _instancia->get_ancho_ventana(), _instancia->get_alto_ventana());
+        _instancia->camara.aplicar();
+        _instancia->escena.visualizar(false);
+
+        // 2. Viewport Planta (si está activo)
+        if (_instancia->verPlanta)
+        {
+            int vpAncho = _instancia->get_ancho_ventana() / 3;
+            int vpAlto = _instancia->get_alto_ventana() / 3;
+            int vpX = _instancia->get_ancho_ventana() - vpAncho;
+            int vpY = _instancia->get_alto_ventana() - vpAlto;
+
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(vpX, vpY, vpAncho, vpAlto);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_SCISSOR_TEST);
+
+            glViewport(vpX, vpY, vpAncho, vpAlto);
+            _instancia->camaraPlanta.aplicar();
+            _instancia->escena.visualizar(false);
+        }
+
+        glutSwapBuffers();
+    }
+}
+
+void igvInterfaz::reshapeFunc(int w, int h)
+{
+    _instancia->set_ancho_ventana(w);
+    _instancia->set_alto_ventana(h);
+    _instancia->camara.aplicar();
+}
+
+void igvInterfaz::idleFunc()
+{
+    int t = glutGet(GLUT_ELAPSED_TIME);
+    float dt = (t - _instancia->t_prev) / 1000.0f;
+    _instancia->t_prev = t;
+
+    if (_instancia->animar_modelo)
+    {
+        _instancia->escena.animar(dt);
+    }
+
+    if (_instancia->orbitar_camara)
+    {
+        _instancia->camara.orbita(20.0f * dt);
+    }
+
     glutPostRedisplay();
 }
 
-void igvInterfaz::inicializarMenu()
-{
-    int menu = glutCreateMenu(menuHandle);
-
-    glutAddMenuEntry("Gl_FLAT",M_PLANO);
-    glutAddMenuEntry("GL_SMOOTH",M_GOURAUD);
-
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
-}
 /**
  * M�todo para inicializar los callbacks GLUT
  */
@@ -330,6 +463,7 @@ void igvInterfaz::inicializa_callbacks()
     //Añadido para buffer de color
     glutMouseFunc(mouseFunc);
     glutMotionFunc(motionFunc);
+    glutIdleFunc(idleFunc);
 }
 
 /**
