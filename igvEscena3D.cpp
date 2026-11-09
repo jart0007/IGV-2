@@ -72,18 +72,19 @@ void igvEscena3D::pintar_ejes()
 /**
  * M�todo con las llamadas OpenGL para visualizar la escena
  */
-void igvEscena3D::visualizar(void)
+void igvEscena3D::visualizar(bool sel)
 {
     GLfloat color_malla[] = {0, 0.25, 0, 1.0};
-    // crear luces
     GLfloat luz0[4] = {5, 5, 5, 1}; // luz puntual para visualizar el cubo
 
-    glLightfv(GL_LIGHT0, GL_POSITION, luz0); // la luz se coloca aquí si permanece fija y no se mueve con la escena
-    glEnable(GL_LIGHT0);
+    if (!sel)
+    {
+        glLightfv(GL_LIGHT0, GL_POSITION, luz0); // la luz se coloca aquí si permanece fija y no se mueve con la escena
+        glEnable(GL_LIGHT0);
 
-    // se pintan los ejes
-    if (ejes) pintar_ejes();
-
+        // se pintan los ejes
+        if (ejes) pintar_ejes();
+    }
     // crear la malla
     glPushMatrix(); // guarda la matriz de modelado
 
@@ -91,23 +92,21 @@ void igvEscena3D::visualizar(void)
     glRotatef(rotY, 0, 1, 0);
     glRotatef(rotZ, 0, 0, 1);
 
-
-    //glLightfv(GL_LIGHT0,GL_POSITION,luz0); // la luz se coloca aquí si se mueve junto con la escena
-    glMaterialfv(GL_FRONT, GL_EMISSION, color_malla);
-
-
-    // Apartado B: la siguiente llamada hay que sustituirla por la llamada al método visualizar de la malla
-
+    if (sel)
+    {
+        glColor3ub(0,0,0);
+    }else
+    {
+        glMaterialfv(GL_FRONT,GL_EMISSION,color_malla);
+    }
     glTranslatef(-1,0,-1);
     malla->visualizar();
-
-
     glPopMatrix(); // restaura la matriz de modelado
+
 
     glPushMatrix();
     //crear el modelo articulado
-    modelo->visualizar();
-
+    if (modelo) modelo->visualizar(sel);
     glPopMatrix();
 }
 
@@ -118,10 +117,7 @@ void igvEscena3D::visualizar(void)
  */
 void igvEscena3D::visualizarVB()
 {
-    glPushMatrix();
-    //crear el modelo articulado
-    modelo->visualizar();
-    glPopMatrix();
+    visualizar(true);
 }
 
 

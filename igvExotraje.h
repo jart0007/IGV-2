@@ -15,6 +15,8 @@
 
 class igvExotraje{
 private:
+    int parte_seleccionada = 0; //0: ninguna, 1: Cuerpo, 2:brazo1, 3:brazo3, 4:Misiles, 5:Lanzador
+
     float mvCuerpo;
     float rotCuerpo;
     float rotBrazo1;
@@ -25,6 +27,15 @@ public:
     igvExotraje();
     ~igvExotraje() = default;
 
+    // Métodos de selección por búfer de color
+    void set_seleccionada(int parte){parte_seleccionada=parte;}
+    int get_seleccionada()const{return parte_seleccionada;}
+    void color(bool sel, int id);
+    int parte_de_color(GLubyte pixel[3]);
+
+    void arrastrar(int parte, int dx, int dy); ///< como el método mover pero por raton y no por teclado
+
+
     //funciones para pintar el exotraje
     void pintar_tubo(float largo, float ancho);
     void pintarCuerpo();
@@ -34,7 +45,6 @@ public:
     void pintarLanzador();
     void pintarRueda();
     void pintarBrazoLanzaMisiles();
-    void arrastrar(int parte, int dx, int dy);
 
     //funciones de grados de libertad
     void mover(int parte, int sentido, bool ejeY);
@@ -48,5 +58,5 @@ public:
 
 
     //metodo para visualizar todo el modelo
-    void visualizar();
+    void visualizar(bool sel);
 };

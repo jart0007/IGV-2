@@ -36,9 +36,12 @@ public:
 
     // M�todos
     // m�todo con las llamadas OpenGL para visualizar la escena
-    void visualizar();
+    void visualizar(bool sel = false);
     void visualizarVB();
 
+    //métodos para el buffer de color
+    int parte_de_color(GLubyte pixel[3]){return modelo ? modelo->parte_de_color(pixel) : 0;} //if inline
+    void set_seleccionada(int parte){ if (modelo) modelo->set_seleccionada(parte);}
     bool get_ejes();
 
     void set_ejes(bool _ejes);

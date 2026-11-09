@@ -198,33 +198,42 @@ void igvInterfaz::reshapeFunc(int w, int h)
  */
 void igvInterfaz::displayFunc()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // borra la ventana y el z-buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, _instancia->get_ancho_ventana(), _instancia->get_alto_ventana());
 
     if (_instancia->modo == IGV_SELECCIONAR)
     {
-
+        // 1. Desactivar luces y dither para obtener colores planos puros[cite: 27, 28]
         glDisable(GL_LIGHTING);
         glDisable(GL_DITHER);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         _instancia->camara.aplicar();
-        _instancia->escena.visualizarVB();
+        _instancia->escena.visualizarVB(); // Dibuja la versión con colores falsos[cite: 28]
 
+        // 2. Leer el color del píxel (con ajuste de coordenada Y en OpenGL)[cite: 27, 28]
         GLubyte pixel[3];
-        glReadPixels(_instancia->cursorX, _instancia->alto_ventana - 1 - _instancia->cursorY, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+        glReadPixels(_instancia->cursorX, _instancia->alto_ventana - 1 - _instancia->cursorY,
+                     1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
 
-        //todo parte de geminis, que lo termine y lo entregüe
-        _instancia->parte =
+        // 3. Traducir color a ID de parte y actualizar estado
+        int parte = _instancia->escena.parte_de_color(pixel);
+        _instancia->parte_seleccionada = parte;
+        _instancia->parte = parte; // Sincroniza la parte activa con el modo teclado
+        _instancia->escena.set_seleccionada(parte);
 
+        // 4. Restaurar estado de visualización normal
+        _instancia->modo = IGV_VISUALIZAR;
+        glEnable(GL_LIGHTING);
+        glEnable(GL_DITHER);
 
-    } else {
+        glutPostRedisplay(); // Redibuja inmediatamente para mostrar el resalte
+    }
+    else
+    {
         _instancia->camara.aplicar();
-
-        _instancia->escena.visualizar();
-
-        // refresca la ventana
-        glutSwapBuffers(); // se utiliza, en vez de glFlush(), para evitar el parpadeo
+        _instancia->escena.visualizar(false);
+        glutSwapBuffers();
     }
 }
 
@@ -263,10 +272,12 @@ void igvInterfaz::motionFunc(GLint x, GLint y)
      */
     if (_instancia->boton_retenido)
     {
-        if (_instancia->parte_seleccionada>=0){
+        if (_instancia->parte_seleccionada>0){
             int dx = x - _instancia->cursorX;
             int dy = _instancia->cursorY - y;
+
             _instancia->escena.arrastrar(_instancia->parte,dx,dy);
+
             _instancia->cursorX = x; _instancia->cursorY = y;
             glutPostRedisplay();
         }

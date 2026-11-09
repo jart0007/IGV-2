@@ -10,6 +10,19 @@
 
 using namespace std;
 
+/*
+ * Para guardar los colores "falsos" para la seleccion usamos una
+ * matriz global del tipo "GLubyte[]"
+ */
+const GLubyte COLOR_SEL[6][3] = {
+    {0, 0, 0},       // 0: Ninguna parte / Fondo
+    {255, 0, 0},     // 1: Cuerpo (Rojo)
+    {0, 255, 0},     // 2: Brazo 1 (Verde)
+    {0, 0, 255},     // 3: Brazo 2 (Azul)
+    {255, 255, 0},   // 4: Brazo Misiles (Amarillo)
+    {255, 0, 255}    // 5: Lanzador (Magenta)
+};
+
 /**
  * @brief constructor de la clase
  * @post todos los grados de libertad inicializados a 0.0f ("f" se pone para aclarar que es un float y el CLION no me grite, por que podría ser un double)
@@ -216,9 +229,72 @@ void igvExotraje::pintarBrazoLanzaMisiles(){
 
 /** ---------------------- Funciones para aplicar los grados de libertad a cada parte ---------------------- */
 
+/**
+ *@brief Selecciona para cada parte un color dependiendo si esta seleccionado o no
+ */
+void igvExotraje::color(bool sel, int id)
+{
+    if (sel)
+    {
+        glColor3ubv(COLOR_SEL[id]);
+    }
+    else
+    {
+        // Reseteamos EMISSION a 0 para no heredar la luz propia de la lámpara
+        GLfloat sin_emision[] = {0.0f, 0.0f, 0.0f, 1.0f};
+        glMaterialfv(GL_FRONT, GL_EMISSION, sin_emision);
+
+        if (id == parte_seleccionada)
+        {
+            GLfloat amarillo[] = {1.0f, 1.0f, 0.0f, 1.0f};
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, amarillo);
+        }
+        else
+        {
+            GLfloat color_original[] = {0.4f, 0.4f, 0.4f, 1.0f};
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, color_original);
+        }
+    }
+}
+
+int igvExotraje::parte_de_color(GLubyte pixel[3])
+{
+    for (int i = 1; i<=5; ++i)
+    {
+        if (pixel[0] == COLOR_SEL[i][0] &&
+            pixel[1] == COLOR_SEL[i][1] &&
+            pixel[2] == COLOR_SEL[i][2])
+        {
+            return i; //click en objeto
+        }
+    }
+    return 0; //has hecho click en el vacio, espabila
+}
+
 void igvExotraje::arrastrar(int parte, int dx, int dy)
 {
-    //todo
+    float sensRot = 0.5f; //grados por pixel
+    float sensTras = 0.05f;
+
+    switch (parte)
+    {
+    case 1: //cuerpo
+        rotarCuerpo(dx * sensRot);
+        moverCuerpo(dy * sensTras);
+        break;
+    case 2: //Brazo 1
+        rotarBrazo1(dy * sensRot);
+        break;
+    case 3: //Brazo 2
+        rotarBrazo2(dy * sensRot);
+        break;
+    case 4: //Brazo misiles
+        rotarBrazoMisilesY(dy*sensRot);
+        break;
+    case 5: //Lanzador
+        rotarLanzadorY(dy*sensRot);
+        break;
+    }
 }
 
 /**
@@ -298,16 +374,16 @@ void igvExotraje::rotarLanzadorY(float ang) {
 /**
  * @brief funcion que dibuja el exotraje en escena
  */
-void igvExotraje::visualizar(){
+void igvExotraje::visualizar(bool sel){
     glPushMatrix();
 
     //nivel 1 (cuerpo)
     glTranslated(0,0,mvCuerpo);
     glRotatef(rotCuerpo,0,1,0);
+
+    color(sel,1);
     pintarCuerpo();
-
     //nivel 2 (brazo1, ruedasx2, brazo-misiles,lanza cosas)
-
     pintarRueda();
 
     glPushMatrix();    //--------rama de brazo1->brazo2->torreta
@@ -316,6 +392,8 @@ void igvExotraje::visualizar(){
         glTranslatef(-0.41,0.25,0);
         glRotatef(-rotBrazo1, 1, 0, 0);
         glRotatef(-90, 0, 1, 0); //Esto invierte los ejes X y Z
+
+        color(sel,2);
         pintarBrazo1();
 
         glRotatef(90, 0, 1, 0); //Deshacemos la inversión
@@ -326,6 +404,8 @@ void igvExotraje::visualizar(){
         glTranslatef(-0.20,0,0);
         glRotatef(90,1,0,0);
         glRotatef(rotBrazo2,0,0,1); //grado de libertad
+
+        color(sel,3);
         pintarBrazo2();
 
         glRotatef(-90,1,0,0); //Deshacemos la inversion del eje
@@ -340,13 +420,27 @@ void igvExotraje::visualizar(){
     glPushMatrix(); //brazo lanza-misiles (para que no afecte al lanzador)
         glTranslatef(0.4, 0.2, 0);
         glRotatef(rotBrazoMisilesY, 1, 0, 0);
+
+        color(sel,4);
         pintarBrazoLanzaMisiles();
     glPopMatrix();
 
     glTranslatef(-0.34,0.35,0);
+
+    color(sel,5);
     glRotatef(rotLanzadorY, 1, 0, 0);
     pintarLanzador();
 
+
+    // RESTAURAR MATERIAL NEUTRO AL SALIR PARA NO CONTAMINAR OTROS OBJETOS DE LA ESCENA <-- arreglo para que no se pinte la lampara sin quererlo
+    if (!sel)
+    {
+        GLfloat neutro[] = {0.4f, 0.4f, 0.4f, 1.0f};
+        GLfloat sin_emision[] = {0.0f, 0.0f, 0.0f, 1.0f};
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, neutro);
+        glMaterialfv(GL_FRONT, GL_EMISSION, sin_emision);
+    }
+    
     glPopMatrix();
 }
 
