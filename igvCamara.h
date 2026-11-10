@@ -91,6 +91,9 @@ class igvCamara
       void rotacionY(double num);
       void moverZnear(double num);
       void moverZfar(double num);
+
+      void setTipo(tipoCamara _tipo);
+      tipoCamara getTipo() const;
 };
 
 #endif   // __IGVCAMARA

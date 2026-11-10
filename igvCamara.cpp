@@ -126,20 +126,14 @@ void igvCamara::aplicar ( void )
  */
 void igvCamara::zoom ( double factor )
 {
-    if (tipo == IGV_PARALELA)
-   {
       xwmin *= factor;
       xwmax *= factor;
       ywmin *= factor;
       ywmax *= factor;
-   }
-   else if (tipo == IGV_PERSPECTIVA)
-   {
       angulo*=factor;
 
       if (angulo < 1.0)   angulo = 1.0;
       if (angulo > 179.0) angulo = 179.0;
-   }
 }
 
 
@@ -224,3 +218,6 @@ void igvCamara::moverZfar(double num)
 {
    zfar += num;
 }
+
+void igvCamara::setTipo ( tipoCamara _tipo ){this->tipo=_tipo;}
+tipoCamara igvCamara::getTipo () const {return this->tipo;}

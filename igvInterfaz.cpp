@@ -34,9 +34,15 @@ igvInterfaz& igvInterfaz::getInstancia()
 void igvInterfaz::crear_mundo()
 {
     // inicia la c�mara
+    p0 = {3,2,4};
+    r={0,0,0};
+    V={0,1,0};
+    /*
     _instancia->camara.set(IGV_PARALELA, {3.0, 2.0, 4}, {0, 0, 0}
                            , {0, 1.0, 0}, -1 * 1.5, 1 * 1.5, -1 * 1.5, 1 * 1.5
-                           , -1 * 3, 200);
+                           , 1 * 3, 200);
+                           */
+    _instancia->camara.set(IGV_PARALELA, p0,r,V, -3, 3, -3, 3, 1, 200);
 
 
     //Camara de perspectiva de planta
@@ -171,6 +177,10 @@ void igvInterfaz::menuHandle(int valor)
     case M_REINICIAR_CAMARA:
         _instancia->crear_mundo();
         break;
+    case M_PROYECCION:
+        if (_instancia->camara.getTipo() == IGV_PARALELA) _instancia->camara.setTipo(IGV_PERSPECTIVA);
+        else _instancia->camara.setTipo(IGV_PARALELA);
+        break;
 
     case M_AYUDA:
         std::cout << "\n=== CONTROLES SEGÚN EL MODO ACTIVO ===\n";
@@ -241,23 +251,62 @@ void igvInterfaz::keyboardFunc(unsigned char key, int x, int y)
             {
             case '1': _instancia->escena.set_seleccionadoObjeto(0); std::cout << "[P1] Objeto 1: Malla\n"; break;
             case '2': _instancia->escena.set_seleccionadoObjeto(1); std::cout << "[P1] Objeto 2: Mecha\n"; break;
+
             case 'x': _instancia->escena.rotar(10, 0, 0); break;
             case 'X': _instancia->escena.rotar(-10, 0, 0); break;
             case 'y': _instancia->escena.rotar(0, 10, 0); break;
             case 'Y': _instancia->escena.rotar(0, -10, 0); break;
             case 'z': _instancia->escena.rotar(0, 0, 10); break;
             case 'Z': _instancia->escena.rotar(0, 0, -10); break;
-            case 's': _instancia->escena.escalar(0.1f); break;
-            case 'S': _instancia->escena.escalar(-0.1f); break;
+
+            case 's': _instancia->escena.escalar(0.9f); break;
+            case 'S': _instancia->escena.escalar(1.1f); break;
+
+            case 'U': _instancia->escena.trasladar(0,0.1f,0); break;
+            case 'u': _instancia->escena.trasladar(0,-0.1f,0); break;
             }
         }
-        else if (_instancia->modoInteraccion == MODO_TECLADO || _instancia->modoInteraccion == MODO_RATON)
+        else if (_instancia->modoInteraccion == MODO_TECLADO)
         {
             if (key >= '1' && key <= '5')
             {
                 _instancia->parte = key - '0';
-                _instancia->parte_seleccionada = _instancia->parte;
-                _instancia->escena.set_seleccionada(_instancia->parte);
+            }
+        }else if (_instancia->modoInteraccion == MODO_RATON)
+        {
+            if (key >= '1' && key <= '5')
+            {
+                _instancia->parte_seleccionada = key - '0';
+                _instancia->escena.set_seleccionada(_instancia->parte_seleccionada);
+            }
+        }else if (_instancia->modoInteraccion == MODO_CAMARA) {
+            switch (key)
+            {
+                case '+':
+                    _instancia->camara.zoom(0.5);
+                    break;
+                case '-':
+                    _instancia->camara.zoom(1.5);
+                    break;
+                case 'Y':
+                    _instancia->camara.rotacionY(5);
+                    break;
+                case 'y':
+                    _instancia->camara.rotacionY(-5);
+                    break;
+            case 'f':
+                _instancia->camara.moverZfar(-0.2);
+                break;
+            case 'F':
+                _instancia->camara.moverZfar(+0.2);
+                break;
+
+            case 'N':
+                _instancia->camara.moverZnear(0.2);
+                break;
+            case 'n':
+                _instancia->camara.moverZnear(-0.2);
+                break;
             }
         }
         break;
@@ -265,6 +314,18 @@ void igvInterfaz::keyboardFunc(unsigned char key, int x, int y)
 
     glutPostRedisplay();
 }
+
+ ///notas para el examen
+ /* 1. !!buffer de color
+ * 2. modificar o tocar alguna cosa de una malla (no imprementarla desde 0)
+ * 3. objetos con grados de libertad (crear o modificar) --> grafo de escena y paranoias
+ * --> NADA de menus o camara
+ *
+ * Codigo de partida: 2a,2b,2c una de esas o mezcladas
+ */
+
+///entrega : explicacion LEVE de como hemos hecho la práctica, el grafo de escena, los grados de libertad
+/// y un video explicativo donde se vea evricin
 
 /**
  * @brief Cursores especiales diferenciados por modo de interacción[cite: 38]
@@ -373,6 +434,8 @@ void igvInterfaz::displayFunc()
 
     if (_instancia->modo == IGV_SELECCIONAR)
     {
+        glViewport(0, 0, _instancia->get_ancho_ventana(), _instancia->get_alto_ventana());
+
         glDisable(GL_LIGHTING);
         glDisable(GL_DITHER);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -88,15 +88,14 @@ void igvEscena3D::visualizar(bool sel)
     glPushMatrix();
     // Transformaciones P1 acumuladas para el modelo 1
     glTranslatef(obj[0].tx, obj[0].ty, obj[0].tz);
+
     glScalef(obj[0].s, obj[0].s, obj[0].s);
+
     glRotatef(obj[0].rx, 1, 0, 0);
     glRotatef(obj[0].ry, 0, 1, 0);
     glRotatef(obj[0].rz, 0, 0, 1);
 
-    // Rotaciones teclado de la malla
-    glRotatef(rotX, 1, 0, 0);
-    glRotatef(rotY, 0, 1, 0);
-    glRotatef(rotZ, 0, 0, 1);
+
 
     if (sel)
     {
@@ -106,7 +105,7 @@ void igvEscena3D::visualizar(bool sel)
     {
         glMaterialfv(GL_FRONT, GL_EMISSION, color_malla);
     }
-    glTranslatef(-1, 0, -1);
+
     malla->visualizar();
     glPopMatrix(); 
 
@@ -115,7 +114,9 @@ void igvEscena3D::visualizar(bool sel)
     glPushMatrix();
     // Transformaciones P1 acumuladas para el robot
     glTranslatef(obj[1].tx, obj[1].ty, obj[1].tz);
+
     glScalef(obj[1].s, obj[1].s, obj[1].s);
+
     glRotatef(obj[1].rx, 1, 0, 0);
     glRotatef(obj[1].ry, 0, 1, 0);
     glRotatef(obj[1].rz, 0, 0, 1);
@@ -194,7 +195,7 @@ void igvEscena3D::rotar(float drx, float dry, float drz)
 
 void igvEscena3D::escalar(float factor)
 {
-    obj[seleccionado].s+=factor;
+    obj[seleccionado].s*=factor;
 }
 
 

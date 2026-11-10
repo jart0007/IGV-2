@@ -33,10 +33,10 @@ enum Vista
 
 enum ModoInteraccion
 {
-    MODO_P1,      ///< Transformaciones P1 (trasladar/rotar/escalar objeto entero)[cite: 30, 38]
-    MODO_TECLADO, ///< Articulaciones por teclado (1..5 + cursores)[cite: 37, 38]
-    MODO_RATON,   ///< Selección por color y arrastre con ratón[cite: 37, 38]
-    MODO_CAMARA   ///< Control manual de la cámara[cite: 37, 38]
+    MODO_P1,      ///< Transformaciones P1 (trasladar/rotar/escalar objeto entero)
+    MODO_TECLADO, ///< Articulaciones por teclado (1..5 + cursores)
+    MODO_RATON,   ///< Selección por color y arrastre con ratón
+    MODO_CAMARA   ///< Control manual de la cámara
 };
 
 /**
@@ -47,8 +47,8 @@ class igvInterfaz
 private:
     // Atributos modelo articulado
     int parte=1;
-    ModoInteraccion modoInteraccion = MODO_TECLADO; ///< Modo por defecto[cite: 37]
-    bool verPlanta = true;                          ///< Controla la vista secundaria de planta[cite: 37]
+    ModoInteraccion modoInteraccion = MODO_TECLADO; ///< Modo por defecto
+    bool verPlanta = true;                          ///< Controla la vista secundaria de planta
     int tipo = 1;
 
     //atributos seleccion por color
